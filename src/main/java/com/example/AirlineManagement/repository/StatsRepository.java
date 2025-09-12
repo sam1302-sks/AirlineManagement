@@ -21,7 +21,7 @@ public interface StatsRepository extends JpaRepository<Flight, Integer> {
     @Query("SELECT COUNT(DISTINCT p) FROM Passenger p")
     Long getTotalPassengers();
 
-    @Query("SELECT COUNT(DISTINCT ac) FROM Aircraft ac")
+    @Query("SELECT COUNT(DISTINCT ac) FROM Zip ac")
     Long getTotalAircraft();
 
     @Query("SELECT COUNT(DISTINCT c) FROM Crew c")
