@@ -16,7 +16,7 @@ public class Maintenance {
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "aircraft_id", nullable = false)
-    private Zip aircraft;
+    private Aircraft aircraft;
 
     @NotNull
     @Column(name = "maintenance_date", nullable = false)
@@ -28,7 +28,7 @@ public class Maintenance {
     // Constructors
     public Maintenance() {}
 
-    public Maintenance(Zip aircraft, LocalDate maintenanceDate, String description) {
+    public Maintenance(Aircraft aircraft, LocalDate maintenanceDate, String description) {
         this.aircraft = aircraft;
         this.maintenanceDate = maintenanceDate;
         this.description = description;
@@ -43,11 +43,11 @@ public class Maintenance {
         this.maintenanceId = maintenanceId;
     }
 
-    public Zip getAircraft() {
+    public Aircraft getAircraft() {
         return aircraft;
     }
 
-    public void setAircraft(Zip aircraft) {
+    public void setAircraft(Aircraft aircraft) {
         this.aircraft = aircraft;
     }
 

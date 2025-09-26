@@ -135,16 +135,16 @@ public class AirlineController {
         }
     }
 
-    // Aircraft (Zip) endpoints
+    // Aircraft (Aircraft) endpoints
     @GetMapping("/aircraft")
-    public List<Zip> getAllAircraft() {
+    public List<Aircraft> getAllAircraft() {
         return zipRepository.findAll();
     }
 
     @PostMapping("/aircraft")
-    public ResponseEntity<Zip> createAircraft(@RequestBody Zip aircraft) {
+    public ResponseEntity<Aircraft> createAircraft(@RequestBody Aircraft aircraft) {
         try {
-            Zip savedAircraft = zipRepository.save(aircraft);
+            Aircraft savedAircraft = zipRepository.save(aircraft);
             return ResponseEntity.ok(savedAircraft);
         } catch (Exception e) {
             return ResponseEntity.badRequest().build();

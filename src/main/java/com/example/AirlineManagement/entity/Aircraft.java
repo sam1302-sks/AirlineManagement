@@ -8,7 +8,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
 @Table(name = "AIRCRAFT")
-public class Zip {
+public class Aircraft {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "aircraft_id")
@@ -30,9 +30,9 @@ public class Zip {
     private List<Maintenance> maintenanceRecords;
 
     // Constructors
-    public Zip() {}
+    public Aircraft() {}
 
-    public Zip(String model, Integer capacity) {
+    public Aircraft(String model, Integer capacity) {
         this.model = model;
         this.capacity = capacity;
     }

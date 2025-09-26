@@ -20,7 +20,7 @@ public class Flight {
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "aircraft_id", nullable = false)
-    private Zip aircraft;
+    private Aircraft aircraft;
 
     @NotNull
     @Column(name = "departure_time", nullable = false)
@@ -40,7 +40,7 @@ public class Flight {
     // Constructors
     public Flight() {}
 
-    public Flight(Route route, Zip aircraft, LocalDateTime departureTime) {
+    public Flight(Route route, Aircraft aircraft, LocalDateTime departureTime) {
         this.route = route;
         this.aircraft = aircraft;
         this.departureTime = departureTime;
@@ -63,11 +63,11 @@ public class Flight {
         this.route = route;
     }
 
-    public Zip getAircraft() {
+    public Aircraft getAircraft() {
         return aircraft;
     }
 
-    public void setAircraft(Zip aircraft) {
+    public void setAircraft(Aircraft aircraft) {
         this.aircraft = aircraft;
     }
 
