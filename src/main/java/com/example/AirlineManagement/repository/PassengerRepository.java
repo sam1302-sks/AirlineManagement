@@ -14,4 +14,7 @@ public interface PassengerRepository extends JpaRepository<Passenger, Integer> {
 
     @Query("SELECT COUNT(p) FROM Passenger p")
     Long countAllPassengers();
+
+    List<Passenger> findByFirstNameContainingIgnoreCase(String firstName);
+    List<Passenger> findByLastNameContainingIgnoreCase(String lastName);
 }

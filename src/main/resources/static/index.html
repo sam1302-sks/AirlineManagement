@@ -37,6 +37,16 @@
                     <i class="fas fa-plane-departure"></i> Flights
                 </a>
             </li>
+            <li class="nav-item">
+                <a href="#search" class="nav-link" onclick="showSection('search')">
+                    <i class="fas fa-search"></i> Search
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#crew" class="nav-link" onclick="showSection('crew')">
+                    <i class="fas fa-user-tie"></i> Crew
+                </a>
+            </li>
         </ul>
     </div>
 </nav>
@@ -199,6 +209,88 @@
             </table>
         </div>
     </section>
+    <!-- Search Section -->
+    <section id="search" class="content-section">
+        <h2 class="section-title">Search</h2>
+
+        <!-- Flight Search -->
+        <div class="search-box">
+            <h3>Search Flight by ID</h3>
+            <form id="flight-search-form">
+                <input type="number" id="flight-search-id" placeholder="Enter Flight ID" required>
+                <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i> Search</button>
+            </form>
+            <div id="flight-search-result"></div>
+        </div>
+
+        <!-- Passenger Search -->
+        <div class="search-box">
+            <h3>Search Passenger by Name</h3>
+            <form id="passenger-search-form">
+                <input type="text" id="passenger-search-name" placeholder="Enter Passenger Name" required>
+                <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i> Search</button>
+            </form>
+            <div id="passenger-search-result"></div>
+        </div>
+    </section>
+    <!-- Crew Section -->
+    <section id="crew" class="content-section">
+        <div class="section-header">
+            <h2 class="section-title">Crew Management</h2>
+            <button class="btn btn-primary" onclick="openModal('crew-modal')">
+                <i class="fas fa-plus"></i> Add Crew Member
+            </button>
+        </div>
+
+        <div class="table-container">
+            <table id="crew-table" class="data-table">
+                <thead>
+                <tr>
+                    <th>Crew ID</th>
+                    <th>Name</th>
+                    <th>Role</th>
+                    <th>Assigned Flight</th>
+                </tr>
+                </thead>
+                <tbody id="crew-tbody">
+                <!-- Data will be populated by JavaScript -->
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- Crew Modal -->
+    <div id="crew-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Add New Crew Member</h3>
+                <span class="close" onclick="closeModal('crew-modal')">&times;</span>
+            </div>
+            <form id="crew-form">
+                <div class="form-group">
+                    <label for="crew-id">Crew ID:</label>
+                    <input type="number" id="crew-id" name="crewId" required>
+                </div>
+                <div class="form-group">
+                    <label for="crew-name">Name:</label>
+                    <input type="text" id="crew-name" name="name" required>
+                </div>
+                <div class="form-group">
+                    <label for="crew-role">Role:</label>
+                    <input type="text" id="crew-role" name="role" required>
+                </div>
+                <div class="form-group">
+                    <label for="crew-flight">Assigned Flight:</label>
+                    <input type="number" id="crew-flight" name="assignedFlightId">
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('crew-modal')">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Add Crew</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
 </main>
 
 <!-- Modals -->

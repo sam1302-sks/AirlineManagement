@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface FlightRepository extends JpaRepository<Flight, Integer> {
@@ -24,4 +25,6 @@ public interface FlightRepository extends JpaRepository<Flight, Integer> {
 
     @Query("SELECT f.status, COUNT(f) FROM Flight f GROUP BY f.status")
     List<Object[]> getFlightStatusDistribution();
+
+    Optional<Flight> findByFlightId(Integer flightId);
 }
