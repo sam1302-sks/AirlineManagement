@@ -1,6 +1,13 @@
 // Global variables
 let statusChart = null;
 let revenueChart = null;
+let currentData = {
+    airlines: [],
+    terminals: [],
+    flights: [],
+    passengers: [],
+    aircraft: []
+};
 
 // API Base URL
 const API_BASE_URL = '/api';
@@ -20,6 +27,8 @@ function setupEventListeners() {
     // Form submissions
     document.getElementById('airline-form').addEventListener('submit', handleAirlineSubmit);
     document.getElementById('terminal-form').addEventListener('submit', handleTerminalSubmit);
+    document.getElementById('passenger-form').addEventListener('submit', handlePassengerSubmit);
+    document.getElementById('aircraft-form').addEventListener('submit', handleAircraftSubmit);
 
     // Modal close on outside click
     window.addEventListener('click', function(event) {
@@ -41,7 +50,8 @@ function showSection(sectionId) {
     // Update navigation
     const navLinks = document.querySelectorAll('.nav-link');
     navLinks.forEach(link => link.classList.remove('active'));
-    document.querySelector(`[onclick="showSection('${sectionId}')"]`).classList.add('active');
+    const activeLink = document.querySelector(`[onclick="showSection('${sectionId}')"]`);
+    if (activeLink) activeLink.classList.add('active');
 
     // Load section-specific data
     switch(sectionId) {
@@ -57,7 +67,34 @@ function showSection(sectionId) {
         case 'flights':
             loadFlights();
             break;
+        case 'passengers':
+            loadPassengers();
+            break;
+        case 'aircraft':
+            loadAircraft();
+            break;
     }
+}
+
+// Search functionality
+function searchTable(section) {
+    const searchInput = document.getElementById(`${section}-search`);
+    const filter = searchInput.value.toLowerCase();
+    const tbody = document.getElementById(`${section}-tbody`);
+    const rows = tbody.getElementsByTagName('tr');
+
+    Array.from(rows).forEach(row => {
+        const text = row.textContent.toLowerCase();
+        if (text.includes(filter)) {
+            row.style.display = '';
+            if (filter.length > 0) {
+                row.classList.add('highlight');
+                setTimeout(() => row.classList.remove('highlight'), 2000);
+            }
+        } else {
+            row.style.display = 'none';
+        }
+    });
 }
 
 // Modal functions
@@ -67,11 +104,8 @@ function openModal(modalId) {
 
 function closeModal(modalId) {
     document.getElementById(modalId).style.display = 'none';
-    // Reset form if exists
     const form = document.querySelector(`#${modalId} form`);
-    if (form) {
-        form.reset();
-    }
+    if (form) form.reset();
 }
 
 // Loading functions
@@ -126,7 +160,6 @@ async function loadDashboardData() {
         }
     } catch (error) {
         console.error('Error loading dashboard:', error);
-        // Load with mock data for demonstration
         loadMockDashboardData();
     }
 }
@@ -138,7 +171,6 @@ function loadMockDashboardData() {
         totalTerminals: 28,
         totalPassengers: 15670,
         totalAircraft: 45,
-        totalCrew: 892,
         flightStatusDistribution: {
             'Scheduled': 45,
             'Departed': 30,
@@ -272,18 +304,11 @@ async function loadAirlines() {
     try {
         const airlines = await apiCall('/airlines');
         if (airlines) {
+            currentData.airlines = airlines;
             updateAirlinesTable(airlines);
         }
     } catch (error) {
         console.error('Error loading airlines:', error);
-        // Load mock data
-        const mockAirlines = [
-            { airlineId: 1, name: 'Air India' },
-            { airlineId: 2, name: 'IndiGo' },
-            { airlineId: 3, name: 'SpiceJet' },
-            { airlineId: 4, name: 'Vistara' }
-        ];
-        updateAirlinesTable(mockAirlines);
     }
 }
 
@@ -337,17 +362,11 @@ async function loadTerminals() {
     try {
         const terminals = await apiCall('/terminals');
         if (terminals) {
+            currentData.terminals = terminals;
             updateTerminalsTable(terminals);
         }
     } catch (error) {
         console.error('Error loading terminals:', error);
-        // Load mock data
-        const mockTerminals = [
-            { terminalId: 1, name: 'IGI Airport', city: 'Delhi', country: 'India' },
-            { terminalId: 2, name: 'Chhatrapati Shivaji', city: 'Mumbai', country: 'India' },
-            { terminalId: 3, name: 'Kempegowda Airport', city: 'Bangalore', country: 'India' }
-        ];
-        updateTerminalsTable(mockTerminals);
     }
 }
 
@@ -405,28 +424,11 @@ async function loadFlights() {
     try {
         const flights = await apiCall('/flights');
         if (flights) {
+            currentData.flights = flights;
             updateFlightsTable(flights);
         }
     } catch (error) {
         console.error('Error loading flights:', error);
-        // Load mock data
-        const mockFlights = [
-            {
-                flightId: 1,
-                route: { originTerminal: { name: 'Delhi' }, destinationTerminal: { name: 'Mumbai' } },
-                aircraft: { model: 'Boeing 737' },
-                departureTime: '2025-09-12T10:30:00',
-                status: 'Scheduled'
-            },
-            {
-                flightId: 2,
-                route: { originTerminal: { name: 'Mumbai' }, destinationTerminal: { name: 'Bangalore' } },
-                aircraft: { model: 'Airbus A320' },
-                departureTime: '2025-09-12T14:15:00',
-                status: 'Departed'
-            }
-        ];
-        updateFlightsTable(mockFlights);
     }
 }
 
@@ -468,9 +470,130 @@ async function updateFlightStatus(flightId, status) {
     }
 }
 
+// Passengers functions
+async function loadPassengers() {
+    try {
+        const passengers = await apiCall('/passengers');
+        if (passengers) {
+            currentData.passengers = passengers;
+            updatePassengersTable(passengers);
+        }
+    } catch (error) {
+        console.error('Error loading passengers:', error);
+    }
+}
+
+function updatePassengersTable(passengers) {
+    const tbody = document.getElementById('passengers-tbody');
+    tbody.innerHTML = '';
+
+    passengers.forEach(passenger => {
+        const row = tbody.insertRow();
+        const dob = passenger.dateOfBirth ? new Date(passenger.dateOfBirth).toLocaleDateString() : 'N/A';
+
+        row.innerHTML = `
+            <td>${passenger.passengerId}</td>
+            <td>${passenger.firstName}</td>
+            <td>${passenger.lastName}</td>
+            <td>${dob}</td>
+            <td>
+                <button class="btn btn-sm btn-danger" onclick="deletePassenger(${passenger.passengerId})">
+                    <i class="fas fa-trash"></i> Delete
+                </button>
+            </td>
+        `;
+    });
+}
+
+async function handlePassengerSubmit(event) {
+    event.preventDefault();
+
+    const formData = new FormData(event.target);
+    const passengerData = {
+        firstName: formData.get('firstName'),
+        lastName: formData.get('lastName'),
+        dateOfBirth: formData.get('dateOfBirth') || null
+    };
+
+    const result = await apiCall('/passengers', 'POST', passengerData);
+    if (result) {
+        closeModal('passenger-modal');
+        loadPassengers();
+        showNotification('Passenger added successfully!', 'success');
+    }
+}
+
+async function deletePassenger(passengerId) {
+    if (confirm('Are you sure you want to delete this passenger?')) {
+        const result = await apiCall(`/passengers/${passengerId}`, 'DELETE');
+        if (result !== null) {
+            loadPassengers();
+            showNotification('Passenger deleted successfully!', 'success');
+        }
+    }
+}
+
+// Aircraft functions
+async function loadAircraft() {
+    try {
+        const aircraft = await apiCall('/aircraft');
+        if (aircraft) {
+            currentData.aircraft = aircraft;
+            updateAircraftTable(aircraft);
+        }
+    } catch (error) {
+        console.error('Error loading aircraft:', error);
+    }
+}
+
+function updateAircraftTable(aircraft) {
+    const tbody = document.getElementById('aircraft-tbody');
+    tbody.innerHTML = '';
+
+    aircraft.forEach(craft => {
+        const row = tbody.insertRow();
+        row.innerHTML = `
+            <td>${craft.aircraftId}</td>
+            <td>${craft.model}</td>
+            <td>${craft.capacity}</td>
+            <td>
+                <button class="btn btn-sm btn-danger" onclick="deleteAircraft(${craft.aircraftId})">
+                    <i class="fas fa-trash"></i> Delete
+                </button>
+            </td>
+        `;
+    });
+}
+
+async function handleAircraftSubmit(event) {
+    event.preventDefault();
+
+    const formData = new FormData(event.target);
+    const aircraftData = {
+        model: formData.get('model'),
+        capacity: parseInt(formData.get('capacity'))
+    };
+
+    const result = await apiCall('/aircraft', 'POST', aircraftData);
+    if (result) {
+        closeModal('aircraft-modal');
+        loadAircraft();
+        showNotification('Aircraft added successfully!', 'success');
+    }
+}
+
+async function deleteAircraft(aircraftId) {
+    if (confirm('Are you sure you want to delete this aircraft?')) {
+        const result = await apiCall(`/aircraft/${aircraftId}`, 'DELETE');
+        if (result !== null) {
+            loadAircraft();
+            showNotification('Aircraft deleted successfully!', 'success');
+        }
+    }
+}
+
 // Notification system
 function showNotification(message, type = 'info') {
-    // Create notification element
     const notification = document.createElement('div');
     notification.className = `notification notification-${type}`;
     notification.innerHTML = `
@@ -478,10 +601,8 @@ function showNotification(message, type = 'info') {
         <button onclick="this.parentElement.remove()">&times;</button>
     `;
 
-    // Add to page
     document.body.appendChild(notification);
 
-    // Auto remove after 5 seconds
     setTimeout(() => {
         if (notification.parentElement) {
             notification.remove();

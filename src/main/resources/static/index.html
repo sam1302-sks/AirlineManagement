@@ -37,6 +37,16 @@
                     <i class="fas fa-plane-departure"></i> Flights
                 </a>
             </li>
+            <li class="nav-item">
+                <a href="#passengers" class="nav-link" onclick="showSection('passengers')">
+                    <i class="fas fa-users"></i> Passengers
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#aircraft" class="nav-link" onclick="showSection('aircraft')">
+                    <i class="fas fa-jet-fighter"></i> Aircraft
+                </a>
+            </li>
         </ul>
     </div>
 </nav>
@@ -124,9 +134,16 @@
     <section id="airlines" class="content-section">
         <div class="section-header">
             <h2 class="section-title">Airlines Management</h2>
-            <button class="btn btn-primary" onclick="openModal('airline-modal')">
-                <i class="fas fa-plus"></i> Add New Airline
-            </button>
+            <div class="header-actions">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="airlines-search" placeholder="Search airlines..."
+                           onkeyup="searchTable('airlines')">
+                </div>
+                <button class="btn btn-primary" onclick="openModal('airline-modal')">
+                    <i class="fas fa-plus"></i> Add New Airline
+                </button>
+            </div>
         </div>
 
         <div class="table-container">
@@ -149,9 +166,16 @@
     <section id="terminals" class="content-section">
         <div class="section-header">
             <h2 class="section-title">Terminals Management</h2>
-            <button class="btn btn-primary" onclick="openModal('terminal-modal')">
-                <i class="fas fa-plus"></i> Add New Terminal
-            </button>
+            <div class="header-actions">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="terminals-search" placeholder="Search terminals..."
+                           onkeyup="searchTable('terminals')">
+                </div>
+                <button class="btn btn-primary" onclick="openModal('terminal-modal')">
+                    <i class="fas fa-plus"></i> Add New Terminal
+                </button>
+            </div>
         </div>
 
         <div class="table-container">
@@ -176,9 +200,16 @@
     <section id="flights" class="content-section">
         <div class="section-header">
             <h2 class="section-title">Flights Management</h2>
-            <button class="btn btn-primary" onclick="openModal('flight-modal')">
-                <i class="fas fa-plus"></i> Add New Flight
-            </button>
+            <div class="header-actions">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="flights-search" placeholder="Search flights..."
+                           onkeyup="searchTable('flights')">
+                </div>
+                <button class="btn btn-primary" onclick="openModal('flight-modal')">
+                    <i class="fas fa-plus"></i> Add New Flight
+                </button>
+            </div>
         </div>
 
         <div class="table-container">
@@ -194,6 +225,73 @@
                 </tr>
                 </thead>
                 <tbody id="flights-tbody">
+                <!-- Data will be populated by JavaScript -->
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- Passengers Section -->
+    <section id="passengers" class="content-section">
+        <div class="section-header">
+            <h2 class="section-title">Passengers Management</h2>
+            <div class="header-actions">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="passengers-search" placeholder="Search passengers..."
+                           onkeyup="searchTable('passengers')">
+                </div>
+                <button class="btn btn-primary" onclick="openModal('passenger-modal')">
+                    <i class="fas fa-plus"></i> Add New Passenger
+                </button>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <table id="passengers-table" class="data-table">
+                <thead>
+                <tr>
+                    <th>Passenger ID</th>
+                    <th>First Name</th>
+                    <th>Last Name</th>
+                    <th>Date of Birth</th>
+                    <th>Actions</th>
+                </tr>
+                </thead>
+                <tbody id="passengers-tbody">
+                <!-- Data will be populated by JavaScript -->
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- Aircraft Section -->
+    <section id="aircraft" class="content-section">
+        <div class="section-header">
+            <h2 class="section-title">Aircraft Management</h2>
+            <div class="header-actions">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="aircraft-search" placeholder="Search aircraft..."
+                           onkeyup="searchTable('aircraft')">
+                </div>
+                <button class="btn btn-primary" onclick="openModal('aircraft-modal')">
+                    <i class="fas fa-plus"></i> Add New Aircraft
+                </button>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <table id="aircraft-table" class="data-table">
+                <thead>
+                <tr>
+                    <th>Aircraft ID</th>
+                    <th>Model</th>
+                    <th>Capacity</th>
+                    <th>Actions</th>
+                </tr>
+                </thead>
+                <tbody id="aircraft-tbody">
                 <!-- Data will be populated by JavaScript -->
                 </tbody>
             </table>
@@ -253,6 +351,58 @@
             <div class="form-actions">
                 <button type="button" class="btn btn-secondary" onclick="closeModal('terminal-modal')">Cancel</button>
                 <button type="submit" class="btn btn-primary">Add Terminal</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Passenger Modal -->
+<div id="passenger-modal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Add New Passenger</h3>
+            <span class="close" onclick="closeModal('passenger-modal')">&times;</span>
+        </div>
+        <form id="passenger-form">
+            <div class="form-group">
+                <label for="passenger-fname">First Name:</label>
+                <input type="text" id="passenger-fname" name="firstName" required>
+            </div>
+            <div class="form-group">
+                <label for="passenger-lname">Last Name:</label>
+                <input type="text" id="passenger-lname" name="lastName" required>
+            </div>
+            <div class="form-group">
+                <label for="passenger-dob">Date of Birth:</label>
+                <input type="date" id="passenger-dob" name="dateOfBirth">
+            </div>
+            <div class="form-actions">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('passenger-modal')">Cancel</button>
+                <button type="submit" class="btn btn-primary">Add Passenger</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Aircraft Modal -->
+<div id="aircraft-modal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Add New Aircraft</h3>
+            <span class="close" onclick="closeModal('aircraft-modal')">&times;</span>
+        </div>
+        <form id="aircraft-form">
+            <div class="form-group">
+                <label for="aircraft-model">Aircraft Model:</label>
+                <input type="text" id="aircraft-model" name="model" required>
+            </div>
+            <div class="form-group">
+                <label for="aircraft-capacity">Capacity:</label>
+                <input type="number" id="aircraft-capacity" name="capacity" required>
+            </div>
+            <div class="form-actions">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('aircraft-modal')">Cancel</button>
+                <button type="submit" class="btn btn-primary">Add Aircraft</button>
             </div>
         </form>
     </div>

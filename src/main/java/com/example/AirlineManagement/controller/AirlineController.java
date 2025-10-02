@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api")
@@ -28,10 +29,22 @@ public class AirlineController {
     @Autowired
     private ZipRepository zipRepository;
 
-    // Airlines endpoints
+    @Autowired
+    private PassengerRepository passengerRepository;
+
+    @Autowired
+    private TicketRepository ticketRepository;
+
+    // ==================== AIRLINES ENDPOINTS ====================
+
     @GetMapping("/airlines")
     public List<Airline> getAllAirlines() {
         return airlineRepository.findAll();
+    }
+
+    @GetMapping("/airlines/search")
+    public List<Airline> searchAirlines(@RequestParam String query) {
+        return airlineRepository.findByNameContaining(query);
     }
 
     @PostMapping("/airlines")
@@ -58,10 +71,16 @@ public class AirlineController {
         }
     }
 
-    // Terminals endpoints
+    // ==================== TERMINALS ENDPOINTS ====================
+
     @GetMapping("/terminals")
     public List<Terminal> getAllTerminals() {
         return terminalRepository.findAll();
+    }
+
+    @GetMapping("/terminals/search")
+    public List<Terminal> searchTerminals(@RequestParam String query) {
+        return terminalRepository.findByNameContaining(query);
     }
 
     @PostMapping("/terminals")
@@ -88,7 +107,8 @@ public class AirlineController {
         }
     }
 
-    // Routes endpoints
+    // ==================== ROUTES ENDPOINTS ====================
+
     @GetMapping("/routes")
     public List<Route> getAllRoutes() {
         return routeRepository.findAll();
@@ -104,10 +124,23 @@ public class AirlineController {
         }
     }
 
-    // Flights endpoints
+    // ==================== FLIGHTS ENDPOINTS ====================
+
     @GetMapping("/flights")
     public List<Flight> getAllFlights() {
         return flightRepository.findAll();
+    }
+
+    @GetMapping("/flights/search")
+    public List<Flight> searchFlights(@RequestParam String query) {
+        return flightRepository.findAll().stream()
+                .filter(flight ->
+                        flight.getStatus().toLowerCase().contains(query.toLowerCase()) ||
+                                (flight.getRoute() != null &&
+                                        (flight.getRoute().getOriginTerminal().getName().toLowerCase().contains(query.toLowerCase()) ||
+                                                flight.getRoute().getDestinationTerminal().getName().toLowerCase().contains(query.toLowerCase())))
+                )
+                .collect(Collectors.toList());
     }
 
     @PostMapping("/flights")
@@ -135,10 +168,16 @@ public class AirlineController {
         }
     }
 
-    // Aircraft (Zip) endpoints
+    // ==================== AIRCRAFT (ZIP) ENDPOINTS ====================
+
     @GetMapping("/aircraft")
     public List<Zip> getAllAircraft() {
         return zipRepository.findAll();
+    }
+
+    @GetMapping("/aircraft/search")
+    public List<Zip> searchAircraft(@RequestParam String query) {
+        return zipRepository.findByModel(query);
     }
 
     @PostMapping("/aircraft")
@@ -146,6 +185,50 @@ public class AirlineController {
         try {
             Zip savedAircraft = zipRepository.save(aircraft);
             return ResponseEntity.ok(savedAircraft);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    // ==================== PASSENGERS ENDPOINTS ====================
+
+    @GetMapping("/passengers")
+    public List<Passenger> getAllPassengers() {
+        return passengerRepository.findAll();
+    }
+
+    @GetMapping("/passengers/search")
+    public List<Passenger> searchPassengers(@RequestParam String query) {
+        return passengerRepository.findByNameContaining(query);
+    }
+
+    @PostMapping("/passengers")
+    public ResponseEntity<Passenger> createPassenger(@RequestBody Passenger passenger) {
+        try {
+            Passenger savedPassenger = passengerRepository.save(passenger);
+            return ResponseEntity.ok(savedPassenger);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    // ==================== TICKETS ENDPOINTS ====================
+
+    @GetMapping("/tickets")
+    public List<Ticket> getAllTickets() {
+        return ticketRepository.findAll();
+    }
+
+    @GetMapping("/tickets/flight/{flightId}")
+    public List<Ticket> getTicketsByFlight(@PathVariable Integer flightId) {
+        return ticketRepository.findByFlightFlightId(flightId);
+    }
+
+    @PostMapping("/tickets")
+    public ResponseEntity<Ticket> createTicket(@RequestBody Ticket ticket) {
+        try {
+            Ticket savedTicket = ticketRepository.save(ticket);
+            return ResponseEntity.ok(savedTicket);
         } catch (Exception e) {
             return ResponseEntity.badRequest().build();
         }
