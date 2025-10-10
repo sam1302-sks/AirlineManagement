@@ -4,9 +4,11 @@ let revenueChart = null;
 let currentData = {
     airlines: [],
     terminals: [],
+    routes: [],
     flights: [],
     passengers: [],
-    aircraft: []
+    aircraft: [],
+    tickets: []
 };
 
 // API Base URL
@@ -27,8 +29,10 @@ function setupEventListeners() {
     // Form submissions
     document.getElementById('airline-form').addEventListener('submit', handleAirlineSubmit);
     document.getElementById('terminal-form').addEventListener('submit', handleTerminalSubmit);
+    document.getElementById('route-form').addEventListener('submit', handleRouteSubmit);
     document.getElementById('passenger-form').addEventListener('submit', handlePassengerSubmit);
     document.getElementById('aircraft-form').addEventListener('submit', handleAircraftSubmit);
+    document.getElementById('ticket-form').addEventListener('submit', handleTicketSubmit);
 
     // Modal close on outside click
     window.addEventListener('click', function(event) {
@@ -40,6 +44,8 @@ function setupEventListeners() {
 
 // Navigation functions
 function showSection(sectionId) {
+    console.log('Showing section:', sectionId);
+
     // Hide all sections
     const sections = document.querySelectorAll('.content-section');
     sections.forEach(section => section.classList.remove('active'));
@@ -64,6 +70,9 @@ function showSection(sectionId) {
         case 'terminals':
             loadTerminals();
             break;
+        case 'routes':
+            loadRoutes();
+            break;
         case 'flights':
             loadFlights();
             break;
@@ -73,6 +82,9 @@ function showSection(sectionId) {
         case 'aircraft':
             loadAircraft();
             break;
+        case 'tickets':
+            loadTickets();
+            break;
     }
 }
 
@@ -80,7 +92,19 @@ function showSection(sectionId) {
 function searchTable(section) {
     const searchInput = document.getElementById(`${section}-search`);
     const filter = searchInput.value.toLowerCase();
-    const tbody = document.getElementById(`${section}-tbody`);
+    let tbody;
+
+    if (section === 'routes') {
+        tbody = document.getElementById('routes-tbody-management');
+    } else {
+        tbody = document.getElementById(`${section}-tbody`);
+    }
+
+    if (!tbody) {
+        console.error('Table body not found for:', section);
+        return;
+    }
+
     const rows = tbody.getElementsByTagName('tr');
 
     Array.from(rows).forEach(row => {
@@ -132,6 +156,7 @@ async function apiCall(endpoint, method = 'GET', data = null) {
             config.body = JSON.stringify(data);
         }
 
+        console.log(`API Call: ${method} ${API_BASE_URL}${endpoint}`);
         const response = await fetch(`${API_BASE_URL}${endpoint}`, config);
 
         if (!response.ok) {
@@ -139,6 +164,7 @@ async function apiCall(endpoint, method = 'GET', data = null) {
         }
 
         const result = await response.json();
+        console.log(`API Response for ${endpoint}:`, result);
         return result;
     } catch (error) {
         console.error('API call failed:', error);
@@ -316,6 +342,12 @@ function updateAirlinesTable(airlines) {
     const tbody = document.getElementById('airlines-tbody');
     tbody.innerHTML = '';
 
+    if (!airlines || airlines.length === 0) {
+        const row = tbody.insertRow();
+        row.innerHTML = '<td colspan="3" style="text-align:center">No airlines found</td>';
+        return;
+    }
+
     airlines.forEach(airline => {
         const row = tbody.insertRow();
         row.innerHTML = `
@@ -374,6 +406,12 @@ function updateTerminalsTable(terminals) {
     const tbody = document.getElementById('terminals-tbody');
     tbody.innerHTML = '';
 
+    if (!terminals || terminals.length === 0) {
+        const row = tbody.insertRow();
+        row.innerHTML = '<td colspan="5" style="text-align:center">No terminals found</td>';
+        return;
+    }
+
     terminals.forEach(terminal => {
         const row = tbody.insertRow();
         row.innerHTML = `
@@ -419,6 +457,100 @@ async function deleteTerminal(terminalId) {
     }
 }
 
+// Routes functions
+async function loadRoutes() {
+    console.log('Loading routes...');
+    try {
+        const routes = await apiCall('/routes');
+        console.log('Routes data received:', routes);
+        console.log('Number of routes:', routes ? routes.length : 0);
+
+        if (routes) {
+            currentData.routes = routes;
+            updateRoutesTable(routes);
+        } else {
+            console.warn('No routes data received');
+            updateRoutesTable([]);
+        }
+    } catch (error) {
+        console.error('Error loading routes:', error);
+        updateRoutesTable([]);
+    }
+}
+
+function updateRoutesTable(routes) {
+    console.log('Updating routes table with:', routes);
+    const tbody = document.getElementById('routes-tbody-management');
+
+    if (!tbody) {
+        console.error('Routes table body not found!');
+        return;
+    }
+
+    tbody.innerHTML = '';
+
+    if (!routes || routes.length === 0) {
+        const row = tbody.insertRow();
+        row.innerHTML = '<td colspan="5" style="text-align:center">No routes found</td>';
+        return;
+    }
+
+    routes.forEach((route, index) => {
+        try {
+            console.log(`Processing route ${index}:`, route);
+
+            const row = tbody.insertRow();
+            const airlineName = route.airline?.name || 'Unknown Airline';
+            const originName = route.originTerminal?.name || 'Unknown Origin';
+            const destName = route.destinationTerminal?.name || 'Unknown Destination';
+
+            row.innerHTML = `
+                <td>${route.routeId || 'N/A'}</td>
+                <td>${airlineName}</td>
+                <td>${originName}</td>
+                <td>${destName}</td>
+                <td>
+                    <button class="btn btn-sm btn-danger" onclick="deleteRoute(${route.routeId})">
+                        <i class="fas fa-trash"></i> Delete
+                    </button>
+                </td>
+            `;
+        } catch (error) {
+            console.error('Error rendering route:', route, error);
+        }
+    });
+
+    console.log('Routes table updated successfully');
+}
+
+async function handleRouteSubmit(event) {
+    event.preventDefault();
+
+    const formData = new FormData(event.target);
+    const routeData = {
+        airline: { airlineId: parseInt(formData.get('airlineId')) },
+        originTerminal: { terminalId: parseInt(formData.get('originTerminalId')) },
+        destinationTerminal: { terminalId: parseInt(formData.get('destinationTerminalId')) }
+    };
+
+    const result = await apiCall('/routes', 'POST', routeData);
+    if (result) {
+        closeModal('route-modal');
+        loadRoutes();
+        showNotification('Route added successfully!', 'success');
+    }
+}
+
+async function deleteRoute(routeId) {
+    if (confirm('Are you sure you want to delete this route?')) {
+        const result = await apiCall(`/routes/${routeId}`, 'DELETE');
+        if (result !== null) {
+            loadRoutes();
+            showNotification('Route deleted successfully!', 'success');
+        }
+    }
+}
+
 // Flights functions
 async function loadFlights() {
     try {
@@ -435,6 +567,12 @@ async function loadFlights() {
 function updateFlightsTable(flights) {
     const tbody = document.getElementById('flights-tbody');
     tbody.innerHTML = '';
+
+    if (!flights || flights.length === 0) {
+        const row = tbody.insertRow();
+        row.innerHTML = '<td colspan="6" style="text-align:center">No flights found</td>';
+        return;
+    }
 
     flights.forEach(flight => {
         const row = tbody.insertRow();
@@ -486,6 +624,12 @@ async function loadPassengers() {
 function updatePassengersTable(passengers) {
     const tbody = document.getElementById('passengers-tbody');
     tbody.innerHTML = '';
+
+    if (!passengers || passengers.length === 0) {
+        const row = tbody.insertRow();
+        row.innerHTML = '<td colspan="5" style="text-align:center">No passengers found</td>';
+        return;
+    }
 
     passengers.forEach(passenger => {
         const row = tbody.insertRow();
@@ -550,6 +694,12 @@ function updateAircraftTable(aircraft) {
     const tbody = document.getElementById('aircraft-tbody');
     tbody.innerHTML = '';
 
+    if (!aircraft || aircraft.length === 0) {
+        const row = tbody.insertRow();
+        row.innerHTML = '<td colspan="4" style="text-align:center">No aircraft found</td>';
+        return;
+    }
+
     aircraft.forEach(craft => {
         const row = tbody.insertRow();
         row.innerHTML = `
@@ -588,6 +738,104 @@ async function deleteAircraft(aircraftId) {
         if (result !== null) {
             loadAircraft();
             showNotification('Aircraft deleted successfully!', 'success');
+        }
+    }
+}
+
+// Tickets functions
+async function loadTickets() {
+    console.log('Loading tickets...');
+    try {
+        const tickets = await apiCall('/tickets');
+        console.log('Tickets data received:', tickets);
+        console.log('Number of tickets:', tickets ? tickets.length : 0);
+
+        if (tickets) {
+            currentData.tickets = tickets;
+            updateTicketsTable(tickets);
+        } else {
+            console.warn('No tickets data received');
+            updateTicketsTable([]);
+        }
+    } catch (error) {
+        console.error('Error loading tickets:', error);
+        updateTicketsTable([]);
+    }
+}
+
+function updateTicketsTable(tickets) {
+    console.log('Updating tickets table with:', tickets);
+    const tbody = document.getElementById('tickets-tbody');
+
+    if (!tbody) {
+        console.error('Tickets table body not found!');
+        return;
+    }
+
+    tbody.innerHTML = '';
+
+    if (!tickets || tickets.length === 0) {
+        const row = tbody.insertRow();
+        row.innerHTML = '<td colspan="6" style="text-align:center">No tickets found</td>';
+        return;
+    }
+
+    tickets.forEach((ticket, index) => {
+        try {
+            console.log(`Processing ticket ${index}:`, ticket);
+
+            const row = tbody.insertRow();
+            const passengerName = ticket.passenger ?
+                `${ticket.passenger.firstName || ''} ${ticket.passenger.lastName || ''}`.trim() :
+                'Unknown';
+            const flightId = ticket.flight?.flightId || 'N/A';
+            const price = ticket.price ? `₹${ticket.price.toFixed(2)}` : 'N/A';
+
+            row.innerHTML = `
+                <td>${ticket.ticketId || 'N/A'}</td>
+                <td>${flightId}</td>
+                <td>${passengerName}</td>
+                <td>${ticket.seatNumber || 'N/A'}</td>
+                <td>${price}</td>
+                <td>
+                    <button class="btn btn-sm btn-danger" onclick="deleteTicket(${ticket.ticketId})">
+                        <i class="fas fa-trash"></i> Delete
+                    </button>
+                </td>
+            `;
+        } catch (error) {
+            console.error('Error rendering ticket:', ticket, error);
+        }
+    });
+
+    console.log('Tickets table updated successfully');
+}
+
+async function handleTicketSubmit(event) {
+    event.preventDefault();
+
+    const formData = new FormData(event.target);
+    const ticketData = {
+        flight: { flightId: parseInt(formData.get('flightId')) },
+        passenger: { passengerId: parseInt(formData.get('passengerId')) },
+        seatNumber: formData.get('seatNumber'),
+        price: parseFloat(formData.get('price'))
+    };
+
+    const result = await apiCall('/tickets', 'POST', ticketData);
+    if (result) {
+        closeModal('ticket-modal');
+        loadTickets();
+        showNotification('Ticket added successfully!', 'success');
+    }
+}
+
+async function deleteTicket(ticketId) {
+    if (confirm('Are you sure you want to delete this ticket?')) {
+        const result = await apiCall(`/tickets/${ticketId}`, 'DELETE');
+        if (result !== null) {
+            loadTickets();
+            showNotification('Ticket deleted successfully!', 'success');
         }
     }
 }

@@ -33,6 +33,11 @@
                 </a>
             </li>
             <li class="nav-item">
+                <a href="#routes" class="nav-link" onclick="showSection('routes')">
+                    <i class="fas fa-route"></i> Routes
+                </a>
+            </li>
+            <li class="nav-item">
                 <a href="#flights" class="nav-link" onclick="showSection('flights')">
                     <i class="fas fa-plane-departure"></i> Flights
                 </a>
@@ -45,6 +50,11 @@
             <li class="nav-item">
                 <a href="#aircraft" class="nav-link" onclick="showSection('aircraft')">
                     <i class="fas fa-jet-fighter"></i> Aircraft
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#tickets" class="nav-link" onclick="showSection('tickets')">
+                    <i class="fas fa-ticket-alt"></i> Tickets
                 </a>
             </li>
         </ul>
@@ -196,6 +206,40 @@
         </div>
     </section>
 
+    <!-- Routes Section (NEW) -->
+    <section id="routes" class="content-section">
+        <div class="section-header">
+            <h2 class="section-title">Routes Management</h2>
+            <div class="header-actions">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="routes-search" placeholder="Search routes..."
+                           onkeyup="searchTable('routes')">
+                </div>
+                <button class="btn btn-primary" onclick="openModal('route-modal')">
+                    <i class="fas fa-plus"></i> Add New Route
+                </button>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <table id="routes-management-table" class="data-table">
+                <thead>
+                <tr>
+                    <th>Route ID</th>
+                    <th>Airline</th>
+                    <th>Origin</th>
+                    <th>Destination</th>
+                    <th>Actions</th>
+                </tr>
+                </thead>
+                <tbody id="routes-tbody-management">
+                <!-- Data will be populated by JavaScript -->
+                </tbody>
+            </table>
+        </div>
+    </section>
+
     <!-- Flights Section -->
     <section id="flights" class="content-section">
         <div class="section-header">
@@ -297,6 +341,41 @@
             </table>
         </div>
     </section>
+
+    <!-- Tickets Section (NEW) -->
+    <section id="tickets" class="content-section">
+        <div class="section-header">
+            <h2 class="section-title">Tickets Management</h2>
+            <div class="header-actions">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="tickets-search" placeholder="Search tickets..."
+                           onkeyup="searchTable('tickets')">
+                </div>
+                <button class="btn btn-primary" onclick="openModal('ticket-modal')">
+                    <i class="fas fa-plus"></i> Add New Ticket
+                </button>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <table id="tickets-table" class="data-table">
+                <thead>
+                <tr>
+                    <th>Ticket ID</th>
+                    <th>Flight ID</th>
+                    <th>Passenger Name</th>
+                    <th>Seat Number</th>
+                    <th>Price</th>
+                    <th>Actions</th>
+                </tr>
+                </thead>
+                <tbody id="tickets-tbody">
+                <!-- Data will be populated by JavaScript -->
+                </tbody>
+            </table>
+        </div>
+    </section>
 </main>
 
 <!-- Modals -->
@@ -356,6 +435,34 @@
     </div>
 </div>
 
+<!-- Route Modal (NEW) -->
+<div id="route-modal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Add New Route</h3>
+            <span class="close" onclick="closeModal('route-modal')">&times;</span>
+        </div>
+        <form id="route-form">
+            <div class="form-group">
+                <label for="route-airline">Airline ID:</label>
+                <input type="number" id="route-airline" name="airlineId" required>
+            </div>
+            <div class="form-group">
+                <label for="route-origin">Origin Terminal ID:</label>
+                <input type="number" id="route-origin" name="originTerminalId" required>
+            </div>
+            <div class="form-group">
+                <label for="route-destination">Destination Terminal ID:</label>
+                <input type="number" id="route-destination" name="destinationTerminalId" required>
+            </div>
+            <div class="form-actions">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('route-modal')">Cancel</button>
+                <button type="submit" class="btn btn-primary">Add Route</button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <!-- Passenger Modal -->
 <div id="passenger-modal" class="modal">
     <div class="modal-content">
@@ -403,6 +510,38 @@
             <div class="form-actions">
                 <button type="button" class="btn btn-secondary" onclick="closeModal('aircraft-modal')">Cancel</button>
                 <button type="submit" class="btn btn-primary">Add Aircraft</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Ticket Modal (NEW) -->
+<div id="ticket-modal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Add New Ticket</h3>
+            <span class="close" onclick="closeModal('ticket-modal')">&times;</span>
+        </div>
+        <form id="ticket-form">
+            <div class="form-group">
+                <label for="ticket-flight">Flight ID:</label>
+                <input type="number" id="ticket-flight" name="flightId" required>
+            </div>
+            <div class="form-group">
+                <label for="ticket-passenger">Passenger ID:</label>
+                <input type="number" id="ticket-passenger" name="passengerId" required>
+            </div>
+            <div class="form-group">
+                <label for="ticket-seat">Seat Number:</label>
+                <input type="text" id="ticket-seat" name="seatNumber" required>
+            </div>
+            <div class="form-group">
+                <label for="ticket-price">Price:</label>
+                <input type="number" step="0.01" id="ticket-price" name="price" required>
+            </div>
+            <div class="form-actions">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('ticket-modal')">Cancel</button>
+                <button type="submit" class="btn btn-primary">Add Ticket</button>
             </div>
         </form>
     </div>

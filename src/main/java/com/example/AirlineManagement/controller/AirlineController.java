@@ -120,6 +120,23 @@ public class AirlineController {
             Route savedRoute = routeRepository.save(route);
             return ResponseEntity.ok(savedRoute);
         } catch (Exception e) {
+            e.printStackTrace(); // This will help debug issues
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    // ADD THIS - DELETE ROUTE ENDPOINT
+    @DeleteMapping("/routes/{id}")
+    public ResponseEntity<?> deleteRoute(@PathVariable Integer id) {
+        try {
+            if (routeRepository.existsById(id)) {
+                routeRepository.deleteById(id);
+                return ResponseEntity.ok().build();
+            } else {
+                return ResponseEntity.notFound().build();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.badRequest().build();
         }
     }
@@ -190,6 +207,21 @@ public class AirlineController {
         }
     }
 
+    // ADD THIS - DELETE AIRCRAFT ENDPOINT
+    @DeleteMapping("/aircraft/{id}")
+    public ResponseEntity<?> deleteAircraft(@PathVariable Integer id) {
+        try {
+            if (zipRepository.existsById(id)) {
+                zipRepository.deleteById(id);
+                return ResponseEntity.ok().build();
+            } else {
+                return ResponseEntity.notFound().build();
+            }
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
     // ==================== PASSENGERS ENDPOINTS ====================
 
     @GetMapping("/passengers")
@@ -207,6 +239,21 @@ public class AirlineController {
         try {
             Passenger savedPassenger = passengerRepository.save(passenger);
             return ResponseEntity.ok(savedPassenger);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    // ADD THIS - DELETE PASSENGER ENDPOINT
+    @DeleteMapping("/passengers/{id}")
+    public ResponseEntity<?> deletePassenger(@PathVariable Integer id) {
+        try {
+            if (passengerRepository.existsById(id)) {
+                passengerRepository.deleteById(id);
+                return ResponseEntity.ok().build();
+            } else {
+                return ResponseEntity.notFound().build();
+            }
         } catch (Exception e) {
             return ResponseEntity.badRequest().build();
         }
@@ -230,6 +277,23 @@ public class AirlineController {
             Ticket savedTicket = ticketRepository.save(ticket);
             return ResponseEntity.ok(savedTicket);
         } catch (Exception e) {
+            e.printStackTrace(); // This will help debug issues
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    // ADD THIS - DELETE TICKET ENDPOINT
+    @DeleteMapping("/tickets/{id}")
+    public ResponseEntity<?> deleteTicket(@PathVariable Integer id) {
+        try {
+            if (ticketRepository.existsById(id)) {
+                ticketRepository.deleteById(id);
+                return ResponseEntity.ok().build();
+            } else {
+                return ResponseEntity.notFound().build();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.badRequest().build();
         }
     }
